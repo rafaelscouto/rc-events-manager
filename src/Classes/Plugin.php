@@ -9,6 +9,7 @@ use RcEventsManager\Classes\Participants;
 use RcEventsManager\Classes\Certificates;
 use RcEventsManager\Classes\Institutions;
 use RcEventsManager\Classes\CertificateModels;
+use RcEventsManager\Classes\Settings;
 
 /**
  * Class Plugin
@@ -23,6 +24,7 @@ class Plugin
     private $certificates;
     private $institutions;
     private $certificate_models;
+    private $settings;
 
     /**
      * Plugin constructor.
@@ -36,6 +38,7 @@ class Plugin
         $this->certificates = new Certificates();
         $this->institutions = new Institutions();
         $this->certificate_models = new CertificateModels();
+        $this->settings = new Settings();
 
         $this->load_text_domain();
         add_action('admin_menu', [$this, 'add_menu_page']);
@@ -126,6 +129,15 @@ class Plugin
             'manage_options',
             'edit.php?post_type=rc_certificate_model',
             null
+        );
+
+        add_submenu_page(
+            RC_EVENTS_MANAGER_TEXT_DOMAIN,
+            __('Settings', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Settings', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'manage_options',
+            'rc-settings',
+            [$this->settings, 'renderSettingsPage']
         );
     }
 

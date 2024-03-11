@@ -3,6 +3,7 @@
 namespace RcEventsManager\Classes;
 
 use RcEventsManager\Classes\Dashboard;
+use RcEventsManager\Classes\Events;
 
 /**
  * Class Plugin
@@ -11,6 +12,7 @@ use RcEventsManager\Classes\Dashboard;
 class Plugin
 {
     private $dashboard;
+    private $events;
 
     /**
      * Plugin constructor.
@@ -18,6 +20,7 @@ class Plugin
     public function __construct()
     {
         $this->dashboard = new Dashboard();
+        $this->events = new Events();
 
         $this->load_text_domain();
         add_action('admin_menu', [$this, 'add_menu_page']);
@@ -53,6 +56,15 @@ class Plugin
             'manage_options',
             RC_EVENTS_MANAGER_TEXT_DOMAIN,
             [$this->dashboard, 'renderDashboardPage']
+        );
+
+        add_submenu_page(
+            RC_EVENTS_MANAGER_TEXT_DOMAIN,
+            __('Events', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Events', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'manage_options',
+            'edit.php?post_type=rc_events',
+            null
         );
     }
 }

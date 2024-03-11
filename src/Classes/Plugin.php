@@ -30,6 +30,7 @@ class Plugin
 
         $this->load_text_domain();
         add_action('admin_menu', [$this, 'add_menu_page']);
+        add_filter('parent_file', [$this, 'bugfix_menu_for_category']);
     }
 
     /**

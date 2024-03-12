@@ -15,6 +15,7 @@ class Institutions
     {
         add_action('init', [$this, 'register_cpt']);
         add_action('add_meta_boxes', [$this, 'add_meta_box']);
+        add_filter('post_type_labels_rc_institutions', [$this, 'change_thumbnail_title']);
     }
 
     /**
@@ -51,23 +52,11 @@ class Institutions
             'rewrite' => ['slug' => 'institutions'],
             'capability_type' => 'post',
             'has_archive' => true,
-            'supports' => ['title']
+            'supports' => ['title', 'thumbnail']
         ];
 
         register_post_type('rc_institutions', $args);
     }
-
-    /**
-     * get institution post meta
-     * @param $post_id
-     * @param $key
-     * @param bool $single
-     * @return mixed
-     */
-    // public function get_post_meta($post_id, $key, $single = true)
-    // {
-    //     return get_post_meta($post_id, $key, $single);
-    // }
 
     /**
      * Add meta box
@@ -90,7 +79,14 @@ class Institutions
      */
     public function render_meta_box($post)
     {
-        $institution_logo = get_post_meta($post->ID, 'rc_institution_logo', true);
+        if (has_post_thumbnail($post->ID)) {
+            $thumbnail_id = get_post_thumbnail_id($post->ID);
+            $thumbnail_url = wp_get_attachment_image_src($thumbnail_id, 'thumbnail', true);
+            $thumbnail_url = $thumbnail_url[0];
+        } else {
+            $thumbnail_url = 'https://fakeimg.pl/1200x750/f6f7f7/dcdcde/?text=No%20image&font=bebas';
+        }
+        $institution_logo = $thumbnail_url;
         $institution_registration = get_post_meta($post->ID, 'rc_institution_registration', true);
         $institution_email = get_post_meta($post->ID, 'rc_institution_email', true);
         $institution_phone = get_post_meta($post->ID, 'rc_institution_phone', true);
@@ -107,5 +103,15 @@ class Institutions
         $institution_director_position = get_post_meta($post->ID, 'rc_institution_director_position', true);
 
         require_once RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/views/admin/meta-box-institutions.php';
+    }
+
+    public function change_thumbnail_title($labels)
+    {
+        $labels->featured_image = __('Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
+        $labels->set_featured_image = __('Set Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
+        $labels->remove_featured_image = __('Remove Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
+        $labels->use_featured_image = __('Use as Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
+
+        return $labels;
     }
 }

@@ -17,6 +17,16 @@ use RcEventsManager\Classes\Settings;
  */
 class Plugin
 {
+    /**
+     * @var Dashboard
+     * @var Events
+     * @var EventCategories
+     * @var Participants
+     * @var Certificates
+     * @var Institutions
+     * @var CertificateModels
+     * @var Settings
+     */
     private $dashboard;
     private $events;
     private $event_categories;
@@ -39,10 +49,18 @@ class Plugin
         $this->institutions = new Institutions();
         $this->certificate_models = new CertificateModels();
         $this->settings = new Settings();
+        $this->run();
+    }
 
+    /**
+     * Run plugin
+     */
+    public function run()
+    {
         $this->load_text_domain();
         add_action('admin_menu', [$this, 'add_menu_page']);
-        add_filter('parent_file', [$this, 'bugfix_menu_for_category']);
+        add_filter('parent_file', [$this, 'bugfix_menu']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_styles_and_scripts_admin']);
     }
 
     /**
@@ -146,15 +164,34 @@ class Plugin
      * @param $parent_file
      * @return string
      */
-    public function bugfix_menu_for_category($parent_file)
+    public function bugfix_menu($parent_file)
     {
         global $pagenow, $plugin_page, $submenu_file, $current_screen;
 
         if ($pagenow == 'edit-tags.php' && isset($current_screen->taxonomy) && $current_screen->taxonomy == 'rc_event_category') {
             $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
             $submenu_file = 'edit-tags.php?taxonomy=rc_event_category&post_type=rc_events';
+        } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_events') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_events';
+        } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_participants') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_participants';
+        } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_certificates') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_certificates';
+        } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_institutions') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_institutions';
+        } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_certificate_model') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_certificate_model';
         }
 
         return $parent_file;
+    }
+
+    public function enqueue_styles_and_scripts_admin() {
+        wp_enqueue_style('rc-events-manager-admin', RC_EVENTS_MANAGER_PLUGIN_URL . 'src/assets/css/admin/rc-admin-main.css', [], RC_EVENTS_MANAGER_VERSION, 'all');
     }
 }

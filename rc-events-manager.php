@@ -58,6 +58,7 @@ class RcEventsManager
     public function run()
     {
         $plugin = new Plugin();
+        $plugin->run();
     }
 }
 

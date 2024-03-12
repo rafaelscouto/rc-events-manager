@@ -1,0 +1,39 @@
+.rc-events-manager{
+    .rc-row{
+        display: flex;
+        gap: 20px;
+        .rc-col{
+            flex: 1;
+            .rc-form-field{
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                .institution_logo{
+                    img{
+                        width: 100px;
+                        height: 100px;
+                        object-fit: cover;
+                        border-radius: 50%;
+                    }
+                }
+            }
+        }
+    }
+    &.rc-meta-boxes{
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+// Mobile
+@media (max-width: 768px){
+    .rc-events-manager{
+        .rc-row{
+            flex-direction: column;
+            .rc-col{
+                flex: 1;
+            }
+        }
+    }
+}

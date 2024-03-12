@@ -1,6 +1,6 @@
 {
     "name": "rafaelscouto/rc-events-manager",
-    "description": "Event management and certificate issuance plugin",
+    "description": "A complete solution for managing events and issuing certificates in WordPress.",
     "type": "wordpress-plugin",
     "license": "GPL-3.0-or-later",
     "autoload": {

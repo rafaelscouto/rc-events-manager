@@ -1,0 +1,17 @@
+{
+  "name": "rc-events-manager",
+  "version": "1.0.0",
+  "description": "A complete solution for managing events and issuing certificates in WordPress.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Rafael Couto",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.69.7"
+  }
+}

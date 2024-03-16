@@ -14,12 +14,18 @@
 
 namespace RCEventsManager;
 
+// Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+// if exists, require the Composer autoload file
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
+use \RcEventsManager\Classes\Activate;
+use \RcEventsManager\Classes\Deactivate;
 use \RcEventsManager\Classes\Plugin;
 
 /**
@@ -30,15 +36,35 @@ class RcEventsManager
 {
     private $version = '1.0.0';
     private $text_domain = 'rc-events-manager';
-
+    
     /**
      * RcEventsManager constructor.
      * Load plugin
      */
     public function __construct()
     {
+        $this->activate();
+        $this->deactivate();
         $this->define_constants();
         $this->run();
+    }
+
+    /**
+     * Plugin activation
+     * @return void
+     */
+    public function activate()
+    {
+        register_activation_hook(__FILE__, [Activate::class, 'activate']);
+    }
+
+    /**
+     * Plugin deactivation
+     * @return void
+     */
+    public function deactivate()
+    {
+        register_deactivation_hook(__FILE__, [Deactivate::class, 'deactivate']);
     }
 
     /**
@@ -62,5 +88,4 @@ class RcEventsManager
     }
 }
 
-// Start plugin
 new RcEventsManager();

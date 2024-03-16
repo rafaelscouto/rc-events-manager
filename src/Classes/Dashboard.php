@@ -20,6 +20,6 @@ class Dashboard
      */
     public function renderDashboardPage()
     {
-        require_once RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/views/admin/page-admin-dashboard.php';
+        require_once RC_EVENTS_MANAGER_PLUGIN_DIR . 'src/views/admin/page-admin-dashboard.php';
     }
 }

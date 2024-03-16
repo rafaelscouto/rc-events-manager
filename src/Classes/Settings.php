@@ -32,6 +32,6 @@ class Settings
      */
     public function renderSettingsPage()
     {
-        require_once RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/views/admin/page-admin-settings.php';
+        require_once RC_EVENTS_MANAGER_PLUGIN_DIR . 'src/views/admin/page-admin-settings.php';
     }
 }

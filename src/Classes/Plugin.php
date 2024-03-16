@@ -2,31 +2,12 @@
 
 namespace RcEventsManager\Classes;
 
-use RcEventsManager\Classes\Dashboard;
-use RcEventsManager\Classes\Events;
-use RcEventsManager\Classes\EventCategories;
-use RcEventsManager\Classes\Participants;
-use RcEventsManager\Classes\Certificates;
-use RcEventsManager\Classes\Institutions;
-use RcEventsManager\Classes\CertificateModels;
-use RcEventsManager\Classes\Settings;
-
 /**
  * Class Plugin
  * @package RcEventsManager
  */
 class Plugin
 {
-    /**
-     * @var Dashboard
-     * @var Events
-     * @var EventCategories
-     * @var Participants
-     * @var Certificates
-     * @var Institutions
-     * @var CertificateModels
-     * @var Settings
-     */
     private $dashboard;
     private $events;
     private $event_categories;
@@ -38,17 +19,25 @@ class Plugin
 
     /**
      * Plugin constructor.
+     * @param Dashboard $dashboard
+     * @param Events $events
+     * @param EventCategories $event_categories
+     * @param Participants $participants
+     * @param Certificates $certificates
+     * @param Institutions $institutions
+     * @param CertificateModels $certificate_models
+     * @param Settings $settings
      */
     public function __construct()
     {
-        $this->dashboard = new Dashboard();
-        $this->events = new Events();
-        $this->event_categories = new EventCategories();
-        $this->participants = new Participants();
-        $this->certificates = new Certificates();
-        $this->institutions = new Institutions();
-        $this->certificate_models = new CertificateModels();
-        $this->settings = new Settings();
+        $this->dashboard = new Dashboard;
+        $this->events = new Events;
+        $this->event_categories = new EventCategories;
+        $this->participants = new Participants;
+        $this->certificates = new Certificates;
+        $this->institutions = new Institutions;
+        $this->certificate_models = new CertificateModels;
+        $this->settings = new Settings;
         $this->run();
     }
 
@@ -68,7 +57,7 @@ class Plugin
      */
     public function load_text_domain()
     {
-        load_plugin_textdomain(RC_EVENTS_MANAGER_TEXT_DOMAIN, false, RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/languages');
+        load_plugin_textdomain(RC_EVENTS_MANAGER_TEXT_DOMAIN, false, RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/Languages');
     }
 
     /**
@@ -133,19 +122,19 @@ class Plugin
 
         add_submenu_page(
             RC_EVENTS_MANAGER_TEXT_DOMAIN,
-            __('Institutions', RC_EVENTS_MANAGER_TEXT_DOMAIN),
-            __('Institutions', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Certificate Models', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Certificate Models', RC_EVENTS_MANAGER_TEXT_DOMAIN),
             'manage_options',
-            'edit.php?post_type=rc_institutions',
+            'edit.php?post_type=rc_certificate_model',
             null
         );
 
         add_submenu_page(
             RC_EVENTS_MANAGER_TEXT_DOMAIN,
-            __('Certificate Models', RC_EVENTS_MANAGER_TEXT_DOMAIN),
-            __('Certificate Models', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Institutions', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            __('Institutions', RC_EVENTS_MANAGER_TEXT_DOMAIN),
             'manage_options',
-            'edit.php?post_type=rc_certificate_model',
+            'edit.php?post_type=rc_institutions',
             null
         );
 
@@ -183,13 +172,19 @@ class Plugin
         } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_institutions') {
             $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
             $submenu_file = 'edit.php?post_type=rc_institutions';
+        } elseif ($pagenow == 'post.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_institutions') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_institutions';
         } elseif ($pagenow == 'post-new.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_certificate_model') {
+            $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
+            $submenu_file = 'edit.php?post_type=rc_certificate_model';
+        } elseif ($pagenow == 'post.php' && isset($current_screen->post_type) && $current_screen->post_type == 'rc_certificate_model') {
             $parent_file = RC_EVENTS_MANAGER_TEXT_DOMAIN;
             $submenu_file = 'edit.php?post_type=rc_certificate_model';
         }
 
         return $parent_file;
-    }
+    }                                                
 
     public function enqueue_styles_and_scripts_admin() {
         wp_enqueue_style('rc-events-manager-admin', RC_EVENTS_MANAGER_PLUGIN_URL . 'src/assets/css/admin/rc-admin-main.css', [], RC_EVENTS_MANAGER_VERSION, 'all');

@@ -1,37 +1,49 @@
-.rc-events-manager{
-    .rc-row{
+.rc_events_manager{
+    .rc_row{
         display: flex;
         gap: 20px;
-        .rc-col{
+        .rc_col{
             flex: 1;
-            .rc-form-field{
+            .rc_form_field{
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
-                .institution_logo{
-                    img{
-                        width: 100px;
-                        height: 100px;
-                        object-fit: cover;
-                        border-radius: 50%;
-                    }
-                }
             }
         }
     }
-    &.rc-meta-boxes{
+    &.rc_meta_boxes{
         display: flex;
         flex-direction: column;
         gap: 20px;
     }
 }
 
+.rc_post_image_column_data{
+    &.rc_circle{
+        img{
+            border-radius: 50%;
+        }
+    }
+    &.rc_rounded{
+        img{
+            border-radius: 5%;
+        }
+    }
+    img{
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        object-position: center;
+        border: 1px solid #c3c4c7;
+    }
+}
+
 // Mobile
 @media (max-width: 768px){
-    .rc-events-manager{
-        .rc-row{
+    .rc_events_manager{
+        .rc_row{
             flex-direction: column;
-            .rc-col{
+            .rc_col{
                 flex: 1;
             }
         }

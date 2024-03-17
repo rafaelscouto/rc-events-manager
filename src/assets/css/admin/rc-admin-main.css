@@ -1,32 +1,40 @@
-.rc-events-manager .rc-row {
+.rc_events_manager .rc_row {
   display: flex;
   gap: 20px;
 }
-.rc-events-manager .rc-row .rc-col {
+.rc_events_manager .rc_row .rc_col {
   flex: 1;
 }
-.rc-events-manager .rc-row .rc-col .rc-form-field {
+.rc_events_manager .rc_row .rc_col .rc_form_field {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-.rc-events-manager .rc-row .rc-col .rc-form-field .institution_logo img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-}
-.rc-events-manager.rc-meta-boxes {
+.rc_events_manager.rc_meta_boxes {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+.rc_post_image_column_data.rc_circle img {
+  border-radius: 50%;
+}
+.rc_post_image_column_data.rc_rounded img {
+  border-radius: 5%;
+}
+.rc_post_image_column_data img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  object-position: center;
+  border: 1px solid #c3c4c7;
+}
+
 @media (max-width: 768px) {
-  .rc-events-manager .rc-row {
+  .rc_events_manager .rc_row {
     flex-direction: column;
   }
-  .rc-events-manager .rc-row .rc-col {
+  .rc_events_manager .rc_row .rc_col {
     flex: 1;
   }
 }

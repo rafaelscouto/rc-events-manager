@@ -2,6 +2,8 @@
 
 namespace RcEventsManager\Classes;
 
+use RcEventsManager\Utils\Utils;
+
 /**
  * Class Institutions
  * @package RcEventsManager
@@ -15,7 +17,11 @@ class Institutions
     {
         add_action('init', [$this, 'register_cpt']);
         add_action('add_meta_boxes', [$this, 'add_meta_box']);
-        add_filter('post_type_labels_rc_institutions', [$this, 'change_thumbnail_title']);
+        add_filter('post_type_labels_rc_institutions', [$this, 'change_featured_image_title']);
+        add_action('save_post', [$this, 'save_meta_box']);
+        add_filter('manage_rc_institutions_posts_columns', [$this, 'custom_columns']);
+        add_action('manage_rc_institutions_posts_custom_column', [$this, 'custom_columns_data'], 10, 2);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_styles_and_scripts_admin']);
     }
 
     /**
@@ -79,39 +85,216 @@ class Institutions
      */
     public function render_meta_box($post)
     {
-        if (has_post_thumbnail($post->ID)) {
-            $thumbnail_id = get_post_thumbnail_id($post->ID);
-            $thumbnail_url = wp_get_attachment_image_src($thumbnail_id, 'thumbnail', true);
-            $thumbnail_url = $thumbnail_url[0];
-        } else {
-            $thumbnail_url = 'https://fakeimg.pl/1200x750/f6f7f7/dcdcde/?text=No%20image&font=bebas';
-        }
-        $institution_logo = $thumbnail_url;
+        $institution_default_theme = get_post_meta($post->ID, 'rc_institution_default_theme', true);
+        $institution_logo = self::logo_thumbnail($post->ID);
+        $institution_register_type = get_post_meta($post->ID, 'rc_institution_register_type', true);
+        $institution_register_types = [
+            ['code' => 'CNPJ', 'title' => __('CNPJ - Brazil', RC_EVENTS_MANAGER_TEXT_DOMAIN)],
+            ['code' => 'EIN', 'title' => __('EIN - United States', RC_EVENTS_MANAGER_TEXT_DOMAIN)],
+            ['code' => 'OTHER', 'title' => __('Other', RC_EVENTS_MANAGER_TEXT_DOMAIN)]
+        ];
         $institution_registration = get_post_meta($post->ID, 'rc_institution_registration', true);
         $institution_email = get_post_meta($post->ID, 'rc_institution_email', true);
         $institution_phone = get_post_meta($post->ID, 'rc_institution_phone', true);
         $institution_address = get_post_meta($post->ID, 'rc_institution_address', true);
         $institution_address_complement = get_post_meta($post->ID, 'rc_institution_address_complement', true);
         $institution_address_number = get_post_meta($post->ID, 'rc_institution_address_number', true);
-        $institution_address_neighborhood = get_post_meta($post->ID, 'rc_institution_address_neighborhood', true);
-        $institution_address_city = get_post_meta($post->ID, 'rc_institution_address_city', true);
-        $institution_address_state = get_post_meta($post->ID, 'rc_institution_address_state', true);
-        $institution_address_zip = get_post_meta($post->ID, 'rc_institution_address_zip', true);
-        $institution_address_country = get_post_meta($post->ID, 'rc_institution_address_country', true);
+        $institution_address_neighborhood = get_post_meta($post->ID, 'rc_institution_neighborhood', true);
+        $institution_address_city = get_post_meta($post->ID, 'rc_institution_city', true);
+        $institution_address_state = get_post_meta($post->ID, 'rc_institution_state', true);
+        $institution_address_zip = get_post_meta($post->ID, 'rc_institution_zip_code', true);
+        $institution_address_country = get_post_meta($post->ID, 'rc_institution_country', true);
         $institution_website = get_post_meta($post->ID, 'rc_institution_website', true);
         $institution_director_name = get_post_meta($post->ID, 'rc_institution_director_name', true);
         $institution_director_position = get_post_meta($post->ID, 'rc_institution_director_position', true);
 
+        wp_nonce_field('rc_institutions_meta_box', 'rc_institutions_meta_box_nonce');
+
         require_once RC_EVENTS_MANAGER_PLUGIN_DIR . '/src/views/admin/meta-box-institutions.php';
     }
 
-    public function change_thumbnail_title($labels)
+    /**
+     * Save meta box
+     * @param $post_id
+     * @return bool
+     */
+    public function save_meta_box($post_id)
     {
-        $labels->featured_image = __('Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
-        $labels->set_featured_image = __('Set Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
-        $labels->remove_featured_image = __('Remove Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
-        $labels->use_featured_image = __('Use as Institution Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN);
+        if (!Utils::check_user_can_save($post_id)) {
+            return false;
+        }
 
-        return $labels;
+        if (!Utils::check_nonce('rc_institutions_meta_box_nonce', 'rc_institutions_meta_box')) {
+            return false;
+        }
+
+        if (isset($_POST['rc_institution_register_type'])) {
+            update_post_meta($post_id, 'rc_institution_register_type', $_POST['rc_institution_register_type']);
+        }
+
+        if (isset($_POST['rc_institution_registration'])) {
+            // Remove all characters except numbers and letters
+            $institution_registration = preg_replace('/[^a-zA-Z0-9]/', '', $_POST['rc_institution_registration']);
+            update_post_meta($post_id, 'rc_institution_registration', $institution_registration);
+        }
+
+        if (isset($_POST['rc_institution_email'])) {
+            // Check if the email is valid
+            if (!filter_var($_POST['rc_institution_email'], FILTER_VALIDATE_EMAIL)) {
+                return false;
+            }
+
+            update_post_meta($post_id, 'rc_institution_email', $_POST['rc_institution_email']);
+        }
+
+        if (isset($_POST['rc_institution_phone'])) {
+            $institution_phone = preg_replace('/\D/', '', $_POST['rc_institution_phone']);
+            update_post_meta($post_id, 'rc_institution_phone', $institution_phone);
+        }
+
+        if (isset($_POST['rc_institution_address'])) {
+            update_post_meta($post_id, 'rc_institution_address', $_POST['rc_institution_address']);
+        }
+
+        if (isset($_POST['rc_institution_address_complement'])) {
+            update_post_meta($post_id, 'rc_institution_address_complement', $_POST['rc_institution_address_complement']);
+        }
+
+        if (isset($_POST['rc_institution_address_number'])) {
+            update_post_meta($post_id, 'rc_institution_address_number', $_POST['rc_institution_address_number']);
+        }
+
+        if (isset($_POST['rc_institution_neighborhood'])) {
+            update_post_meta($post_id, 'rc_institution_neighborhood', $_POST['rc_institution_neighborhood']);
+        }
+
+        if (isset($_POST['rc_institution_city'])) {
+            update_post_meta($post_id, 'rc_institution_city', $_POST['rc_institution_city']);
+        }
+
+        if (isset($_POST['rc_institution_state'])) {
+            update_post_meta($post_id, 'rc_institution_state', $_POST['rc_institution_state']);
+        }
+
+        if (isset($_POST['rc_institution_zip_code'])) {
+            update_post_meta($post_id, 'rc_institution_zip_code', $_POST['rc_institution_zip_code']);
+        }
+
+        if (isset($_POST['rc_institution_country'])) {
+            update_post_meta($post_id, 'rc_institution_country', $_POST['rc_institution_country']);
+        }
+
+        if (isset($_POST['rc_institution_website'])) {
+            update_post_meta($post_id, 'rc_institution_website', $_POST['rc_institution_website']);
+        }
+
+        if (isset($_POST['rc_institution_director_name'])) {
+            update_post_meta($post_id, 'rc_institution_director_name', $_POST['rc_institution_director_name']);
+        }
+
+        if (isset($_POST['rc_institution_director_position'])) {
+            update_post_meta($post_id, 'rc_institution_director_position', $_POST['rc_institution_director_position']);
+        }
+
+        return true;
+    }
+
+    /**
+     * Get institutions
+     * @return array
+     */
+    public static function get_institutions()
+    {
+        $args = [
+            'post_type' => 'rc_institutions',
+            'post_status' => 'publish',
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'posts_per_page' => -1
+        ];
+
+        $institutions = get_posts($args);
+
+        return $institutions;
+    }
+
+    /**
+     * Change featured image title
+     * @param $labels
+     * @return mixed
+     */
+    public function change_featured_image_title($labels)
+    {
+        return Utils::change_featured_image_title($labels, 'Institution Logo');
+    }
+
+    /**
+     * Logo thumbnail
+     * @param $post_id
+     * @return string
+     */
+    public static function logo_thumbnail($post_id)
+    {
+        return Utils::get_post_thumbnail($post_id, 'thumbnail');
+    }
+    
+    /**
+     * Custom columns
+     * @param $columns
+     * @return mixed
+     */
+    public function custom_columns($columns)
+    {
+        $columns = [
+            'cb' => $columns['cb'],
+            'rc_institution_logo' => __('Logo', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'title' => __('Name', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'rc_institution_registration' => __('Registration Number', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'rc_institution_email' => __('Email', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'rc_institution_phone' => __('Phone', RC_EVENTS_MANAGER_TEXT_DOMAIN),
+            'date' => $columns['date']
+        ];
+
+        return $columns;
+    }
+
+    /**
+     * Custom columns data
+     * @param $column
+     * @param $post_id
+     * @return void
+     */
+    public function custom_columns_data($column, $post_id)
+    {
+        switch ($column) {
+            case 'rc_institution_logo':
+                echo '<div class="rc_post_image_column_data rc_circle"><img src="' . self::logo_thumbnail($post_id) . '" alt="Institution Logo"></div>';
+                break;
+            case 'rc_institution_registration':
+                echo get_post_meta($post_id, 'rc_institution_registration', true);
+                break;
+            case 'rc_institution_email':
+                echo get_post_meta($post_id, 'rc_institution_email', true);
+                break;
+            case 'rc_institution_phone':
+                echo get_post_meta($post_id, 'rc_institution_phone', true);
+                break;
+        }
+    }
+
+    /**
+     * Enqueue scripts only for Institutions
+     * @param $hook
+     */
+    public function enqueue_styles_and_scripts_admin($hook)
+    {
+        if ('post-new.php' === $hook || 'post.php' === $hook) {
+            global $post_type;
+
+            if ('rc_institutions' === $post_type) {
+                wp_enqueue_media();
+                wp_enqueue_script('rc-events-manager-admin-institutions', RC_EVENTS_MANAGER_PLUGIN_URL . 'src/assets/js/admin/rc-admin-institutions.js', [], RC_EVENTS_MANAGER_VERSION, true);
+            }
+        }
     }
 }

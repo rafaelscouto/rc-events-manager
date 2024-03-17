@@ -184,9 +184,13 @@ class Plugin
         }
 
         return $parent_file;
-    }                                                
+    }
 
+    /**
+     * Enqueue styles and scripts admin
+     */
     public function enqueue_styles_and_scripts_admin() {
         wp_enqueue_style('rc-events-manager-admin', RC_EVENTS_MANAGER_PLUGIN_URL . 'src/assets/css/admin/rc-admin-main.css', [], RC_EVENTS_MANAGER_VERSION, 'all');
+        wp_enqueue_script('rc-events-manager-imask', 'https://unpkg.com/imask', [], RC_EVENTS_MANAGER_VERSION, true);
     }
 }
